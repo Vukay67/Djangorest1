@@ -14,6 +14,7 @@ class Product(models.Model):
     type = models.CharField(choices=TYPE_CHOICES, max_length=20)
     name = models.CharField(max_length=100)
     price = models.PositiveIntegerField()
+    views_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"({self.type}) {self.name} {self.price}с/кг"

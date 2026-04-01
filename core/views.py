@@ -3,8 +3,11 @@ from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
 from rest_framework import mixins
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Product
 from .serializers import ProductSerializer
+from .filters import ProductFilter
 
 def test_view(request):
     return render(request, "test.html")
@@ -40,6 +43,11 @@ class HelloAPIView(APIView):
 class ProductListAPIView(GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_class = ProductFilter
+
+    ordering_fields = ['name', 'price']
+    ordering = ['-name']
 
     def get(self, request):
         return self.list(request)
@@ -52,6 +60,12 @@ class ProductRetrieveAPIView(GenericAPIView, mixins.DestroyModelMixin, mixins.Up
     queryset = Product.objects.all()
 
     def get(self, request, pk):
+        product = Product.objects.get(pk=pk)
+
+        if product:
+            product.views_count += 1
+            product.save()
+
         return self.retrieve(request, pk)
     
     def delete(self, request, pk):
